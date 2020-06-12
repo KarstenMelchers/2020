@@ -45,7 +45,7 @@ p <- tom_profits %>% ggplot(aes(x = reorder(category,avg), y = avg, fill = col_g
     strip.text = element_blank(),
     axis.text.x = element_text(angle = 45, hjust = 1.1, vjust = 1.4)
   )
-p
+
 #save plot with date in name
 ggsave(filename = paste("ac_avg_tom_profits_",as.character(Sys.Date()),".png",sep = ""),
        plot = p,
