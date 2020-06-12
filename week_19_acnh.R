@@ -12,14 +12,17 @@ items <- items %>% mutate(buy_currency = ifelse(is.na(buy_currency) == TRUE,sell
   filter(!is.na(buy_value), buy_currency == "bells")
 
 #average plot ====
+#calculate profits then group by category and get the average
 tom_profits <- items %>% mutate(profits = buy_value - sell_value) %>% 
   select(category,profits) %>% 
   filter(!is.na(category),!is.na(profits)) %>%
   group_by(category) %>% 
   dplyr::summarize(avg = mean(profits))
 
+#reorder in descending order and then add the repeating sequence so the colours repeat in stripes
 tom_profits <- tom_profits[order(tom_profits$avg),] %>% mutate(col_group = rep(c("a","b","c"),6))
 
+#plot
 p <- tom_profits %>% ggplot(aes(x = reorder(category,avg), y = avg, fill = col_group)) +
   #labels and titles
   xlab("Category") + ylab("Average Profit") + ggtitle("Tom Nook's Average Profits","by Item Category") +
@@ -31,7 +34,7 @@ p <- tom_profits %>% ggplot(aes(x = reorder(category,avg), y = avg, fill = col_g
   scale_y_continuous(breaks = seq(0, 13000, by = 1000)) +
   #adding the bars. Stat = identity because we already have a count
   geom_bar(stat = "identity") +
-  #manual FS branded colours and naming the legend 
+  #these are the three colours that will repeat 
   scale_fill_manual(values = c("#8a83ce","#ff9391","#ffb1c1")) +
   #formatting
   theme(
@@ -56,6 +59,7 @@ ggsave(filename = paste("ac_avg_tom_profits_",as.character(Sys.Date()),".png",se
        device = "png")
 
 #median plot ====
+#calculate profits then group by category and get the median
 tom_profits_med <- items %>% mutate(profits = buy_value - sell_value) %>% 
   select(category,profits) %>% 
   filter(!is.na(category),!is.na(profits)) %>%
@@ -75,8 +79,8 @@ p <- tom_profits_med %>% ggplot(aes(x = reorder(category,median_profit), y = med
   scale_y_continuous(breaks = seq(0, 3000, by = 500)) +
   #adding the bars. Stat = identity because we already have a count
   geom_bar(stat = "identity") +
-  #manual FS branded colours and naming the legend 
-  scale_fill_manual(values = c("#8a83ce","#ff9391","#ffb1c1")) +
+  #these are the three colours that will repeat
+scale_fill_manual(values = c("#8a83ce","#ff9391","#ffb1c1")) +
   #formatting
   theme(
     legend.position = "blank",
@@ -100,10 +104,12 @@ ggsave(filename = paste("ac_median_tom_profits_",as.character(Sys.Date()),".png"
        device = "png")
 
 ##box plot ----
+#same as before but don't group so that we can see the distribution in the boxplot
 tom_profits_bp <- items %>% mutate(profits = buy_value - sell_value) %>% 
   select(category,profits) %>% 
   filter(!is.na(category),!is.na(profits))
 
+#here i join the previous df so that i can get the same colour convetions and then drop the average since it's not useful
 tom_profits_bp <- merge(tom_profits_bp,tom_profits, by = "category") %>% select(-avg)
 
 tom_profits_bp %>% ggplot(aes(x = reorder(category,-profits), y = profits, fill = col_group)) + scale_y_log10(breaks = 10^(1:10)) +
@@ -115,8 +121,8 @@ tom_profits_bp %>% ggplot(aes(x = reorder(category,-profits), y = profits, fill 
            size = 0.5) +
   #adding the bars. Stat = identity because we already have a count
   geom_boxplot() +
-  #manual FS branded colours and naming the legend 
-  scale_fill_manual(values = c("#8a83ce","#ff9391","#ffb1c1")) +
+  #these are the three colours that will repeat
+scale_fill_manual(values = c("#8a83ce","#ff9391","#ffb1c1")) +
   #formatting
   theme(
     legend.position = "blank",
@@ -136,5 +142,3 @@ ggsave(filename = paste("ac_tom_profits_",as.character(Sys.Date()),".png",sep = 
        dpi = 300,
        units = "in",
        device = "png")
-
-
